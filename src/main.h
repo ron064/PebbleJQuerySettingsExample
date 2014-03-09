@@ -14,7 +14,7 @@
 #define SAVEKEY_SETTINGS 1
 
 
-// javascript defines
+// javascript key
 //
 enum {
 	KEY_BANNER = 0,
