@@ -1,0 +1,28 @@
+{
+  "versionLabel": "0.1",
+  "uuid": "ee12d92f-060f-4bca-ad99-a09073a939ef",
+  "longName": "JQ Example",
+  "versionCode": 2,
+  "shortName": "JQ Example",
+  "companyName": "tgwaste",
+	"capabilities": [ "configurable" ],
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+		"banner": 0,
+		"weekday": 1,
+		"showdate": 2,
+		"footer": 3
+  },
+  "resources": {
+    "media": [
+      {
+        "menuIcon": true,
+        "type": "png",
+        "name": "MENU_ICON",
+        "file": "images/menu.png"
+      }
+		]
+	}
+}

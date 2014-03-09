@@ -1,0 +1,141 @@
+//
+// main.c
+// (c) 2013 Ted Gerold (tgwaste)
+//
+
+#include "main.h"
+
+
+// get and process javascript messages
+//
+void jsmsg(DictionaryIterator *iter, void *context)
+{
+	Tuple *banner = dict_find(iter, KEY_BANNER);
+
+	if (banner) {
+		snprintf(settings.banner, sizeof(settings.banner), "%.40s", dict_find(iter,KEY_BANNER)->value->cstring);
+		settings.weekday = !strcmp(dict_find(iter,KEY_WEEKDAY)->value->cstring,"y") ? 1 : 0;
+		settings.showdate = atoi(dict_find(iter,KEY_SHOWDATE)->value->cstring);
+		snprintf(settings.footer, sizeof(settings.footer), "%.40s", dict_find(iter,KEY_FOOTER)->value->cstring);
+	}
+
+	banner = NULL;
+
+	layer_mark_dirty(window_layer);
+}
+
+
+// set our layer attributes
+//
+void set_layer_attr(TextLayer *textlayer, GFont font)
+{
+	text_layer_set_text_alignment(textlayer, GTextAlignmentCenter);
+	text_layer_set_text_color(textlayer, GColorWhite);
+	text_layer_set_background_color(textlayer, GColorBlack);
+	text_layer_set_font(textlayer, fonts_get_system_font(font));
+	layer_add_child(window_layer, text_layer_get_layer(textlayer));
+}
+
+
+// handle every minute
+//
+void handle_minute(struct tm *tm, TimeUnits units_changed)
+{
+	layer_mark_dirty(window_layer);
+}
+
+
+// display handler
+//
+void display_handler(Layer *me, GContext *context)
+{
+	static char time_text[] = "00:00";
+	static char weekday_text[] = "         ";
+	static char date_text[] = "         ";
+	time_t now = time(NULL);
+	struct tm *tm = localtime(&now);
+
+	light_enable(true);
+
+	strftime(time_text, sizeof(time_text), clock_is_24h_style() ? "%H:%M" : "%l:%M", tm);
+	strftime(weekday_text, sizeof(weekday_text), settings.weekday ? "%A" : "", tm);
+	strftime(date_text, sizeof(date_text), settings.showdate ? "%B %d" : "", tm);
+
+	text_layer_set_text(bannerLayer, settings.banner);
+	text_layer_set_text(timeLayer, time_text);
+	text_layer_set_text(weekdayLayer, weekday_text);
+	text_layer_set_text(dateLayer, date_text);
+
+	text_layer_set_text(footerLayer, settings.footer);
+}
+
+
+// initialize window
+//
+void init(void)
+{
+	window = window_create();
+	window_set_fullscreen(window, true);
+	window_stack_push(window, true);
+	window_set_background_color(window, GColorBlack);
+
+	window_layer = layer_create(layer_get_frame(window_get_root_layer(window)));
+	layer_add_child(window_get_root_layer(window), window_layer);
+	layer_set_update_proc(window_layer, display_handler);
+
+	bannerLayer = text_layer_create(GRect(0,0,WIDTH,22));
+	set_layer_attr(bannerLayer, FONT_KEY_GOTHIC_18_BOLD);
+
+	timeLayer = text_layer_create(GRect(0,22,WIDTH,55));
+	set_layer_attr(timeLayer, FONT_KEY_ROBOTO_BOLD_SUBSET_49);
+
+	weekdayLayer = text_layer_create(GRect(0,77,WIDTH,28));
+	set_layer_attr(weekdayLayer, FONT_KEY_GOTHIC_24_BOLD);
+
+	dateLayer = text_layer_create(GRect(0,105,WIDTH,28));
+	set_layer_attr(dateLayer, FONT_KEY_GOTHIC_24_BOLD);
+
+	footerLayer = text_layer_create(GRect(0,133,WIDTH,28));
+	set_layer_attr(footerLayer, FONT_KEY_GOTHIC_24_BOLD);
+
+	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute);
+	persist_read_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
+
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "- JQuery Settings Example App -");
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "(c) 2013 Ted Gerold (tgwaste)");
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "App window ready [%p]", window);
+
+	app_message_register_inbox_received(jsmsg);
+	app_message_open(256,50); // in/out
+}
+
+
+// deinit the application
+//
+void deinit(void)
+{
+	persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
+	tick_timer_service_unsubscribe();
+
+	text_layer_destroy(bannerLayer);
+	text_layer_destroy(timeLayer);
+	text_layer_destroy(weekdayLayer);
+	text_layer_destroy(dateLayer);
+	text_layer_destroy(footerLayer);
+
+	layer_destroy(window_layer);
+	window_destroy(window);
+
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "App shutting down... Goodbye.");
+}
+
+
+// good ol main
+//
+int main(void)
+{
+	init();
+	app_event_loop();
+	deinit();
+}
+
