@@ -1,5 +1,6 @@
 //
-// javascript
+// javascript file for jquery example
+// (c) 2014 Ted Gerold (tgwaste)
 //
 
 

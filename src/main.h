@@ -1,6 +1,6 @@
 //
 // main.h
-// (c) 2013 Ted Gerold (tgwaste)
+// (c) 2014 Ted Gerold (tgwaste)
 //
 
 #pragma once
