@@ -51,18 +51,18 @@ void handle_minute(struct tm *tm, TimeUnits units_changed)
 void display_handler(Layer *me, GContext *context)
 {
 	static char time_text[] = "00:00";
-	static char weekday_text[] = "         ";
+	static char wday_text[] = "         ";
 	static char date_text[] = "         ";
 	time_t now = time(NULL);
 	struct tm *tm = localtime(&now);
 
 	strftime(time_text, sizeof(time_text), clock_is_24h_style() ? "%H:%M" : "%l:%M", tm);
-	strftime(weekday_text, sizeof(weekday_text), settings.weekday ? "%A" : "", tm);
+	strftime(wday_text, sizeof(wday_text), settings.weekday ? "%A" : "", tm);
 	strftime(date_text, sizeof(date_text), settings.showdate ? "%B %d" : "", tm);
 
 	text_layer_set_text(bannerLayer, settings.banner);
 	text_layer_set_text(timeLayer, time_text);
-	text_layer_set_text(weekdayLayer, weekday_text);
+	text_layer_set_text(weekdayLayer, wday_text);
 	text_layer_set_text(dateLayer, date_text);
 	text_layer_set_text(footerLayer, settings.footer);
 }
