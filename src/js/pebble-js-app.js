@@ -3,7 +3,7 @@
 //
 
 
-// callback for the app ready event
+// app ready event
 //
 Pebble.addEventListener("ready",
 	function(e) {

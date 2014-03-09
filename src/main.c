@@ -6,7 +6,7 @@
 #include "main.h"
 
 
-// get and process javascript messages
+// incoming javascript messages
 //
 void jsmsg(DictionaryIterator *iter, void *context)
 {
@@ -17,6 +17,7 @@ void jsmsg(DictionaryIterator *iter, void *context)
 		settings.weekday = !strcmp(dict_find(iter,KEY_WEEKDAY)->value->cstring,"y") ? 1 : 0;
 		settings.showdate = atoi(dict_find(iter,KEY_SHOWDATE)->value->cstring);
 		snprintf(settings.footer, sizeof(settings.footer), "%.40s", dict_find(iter,KEY_FOOTER)->value->cstring);
+		persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
 	}
 
 	banner = NULL;
@@ -55,8 +56,6 @@ void display_handler(Layer *me, GContext *context)
 	time_t now = time(NULL);
 	struct tm *tm = localtime(&now);
 
-	light_enable(true);
-
 	strftime(time_text, sizeof(time_text), clock_is_24h_style() ? "%H:%M" : "%l:%M", tm);
 	strftime(weekday_text, sizeof(weekday_text), settings.weekday ? "%A" : "", tm);
 	strftime(date_text, sizeof(date_text), settings.showdate ? "%B %d" : "", tm);
@@ -65,7 +64,6 @@ void display_handler(Layer *me, GContext *context)
 	text_layer_set_text(timeLayer, time_text);
 	text_layer_set_text(weekdayLayer, weekday_text);
 	text_layer_set_text(dateLayer, date_text);
-
 	text_layer_set_text(footerLayer, settings.footer);
 }
 
@@ -101,9 +99,9 @@ void init(void)
 	tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute);
 	persist_read_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
 
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "- JQuery Settings Example App -");
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "(c) 2013 Ted Gerold (tgwaste)");
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "App window ready [%p]", window);
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "- Pebble JQuery Settings Example -");
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "(c) 2014 Ted Gerold (tgwaste)");
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Window ready [%p]", window);
 
 	app_message_register_inbox_received(jsmsg);
 	app_message_open(256,50); // in/out
@@ -114,7 +112,6 @@ void init(void)
 //
 void deinit(void)
 {
-	persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
 	tick_timer_service_unsubscribe();
 
 	text_layer_destroy(bannerLayer);
