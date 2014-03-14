@@ -1,7 +1,10 @@
-//
-// main.c
-// (c) 2014 Ted Gerold (tgwaste)
-//
+/*
+ * Example app demonstrating the different settings with Pebble, JQuery and Javascript
+ *
+ * (c) 2014 Ted Gerold (tgwaste)
+ *
+ * This code may be used or modified in any way without permission.
+*/
 
 #include "main.h"
 
@@ -28,11 +31,6 @@ void jsmsg(DictionaryIterator *iter, void *context)
 		snprintf(settings.footer, sizeof(settings.footer), "%.40s", footer->value->cstring);
 
 	persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
-
-	banner = NULL;
-	weekday = NULL;
-	showdate = NULL;
-	footer = NULL;
 
 	layer_mark_dirty(window_layer);
 }

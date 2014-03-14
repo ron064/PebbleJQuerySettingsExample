@@ -1,7 +1,10 @@
-//
-// javascript file for jquery example
-// (c) 2014 Ted Gerold (tgwaste)
-//
+/*
+ * Example app demonstrating the different settings with Pebble, JQuery and Javascript
+ *
+ * (c) 2014 Ted Gerold (tgwaste)
+ *
+ * This code may be used or modified in any way without permission.
+*/
 
 
 // app message sent successfully
