@@ -1,7 +1,24 @@
+/*
+ * Example app demonstrating the different settings with Pebble, JQuery and Javascript
+ *
+ * (c) 2014 Ted Gerold (tgwaste)
+ *
+ * This code may be used or modified in any way without permission.
+*/
+
+
+// app message sent successfully
 //
-// javascript file for jquery example
-// (c) 2014 Ted Gerold (tgwaste)
+function appMessageAck(e) {
+	console.log("App message sent successfully");
+}
+
+
+// app message failed to send
 //
+function appMessageNack(e) {
+	console.log("App message failed to send: " + e.error.message);
+}
 
 
 // app ready event
@@ -17,11 +34,9 @@ Pebble.addEventListener("ready",
 //
 Pebble.addEventListener("showConfiguration",
 	function() {
-		var config = "https://dl.dropboxusercontent.com/u/61083309/pebble/jqexample.html";
 		var settings = encodeURIComponent(localStorage.getItem("settings"));
-		var url = config + "?settings=" + settings;
-		console.log("Showing configuration screen...");
-		console.log(url);
+		var url = 'http://dl.dropbox.com/u/61083309/pebble/jqexample.html?settings=' + settings;
+		console.log("Opening Config: " + url);
 		Pebble.openURL(url);
 	}
 );
@@ -31,20 +46,15 @@ Pebble.addEventListener("showConfiguration",
 //
 Pebble.addEventListener("webviewclosed",
 	function(e) {
-		var options;
+		var settings;
 		try {
-			options = JSON.parse(decodeURIComponent(e.response));
+			settings = JSON.parse(decodeURIComponent(e.response));
 			localStorage.clear();
-			localStorage.setItem("settings", JSON.stringify(options));
+			localStorage.setItem("settings", JSON.stringify(settings));
 			console.log("Settings: " + localStorage.getItem("settings"));
-			Pebble.sendAppMessage({
-				"banner":options.banner,
-				"weekday":options.weekday,
-				"showdate":(options.showdate===true)?"1":"0",
-				"footer":options.footer
-			});
+			Pebble.sendAppMessage(settings, appMessageAck, appMessageNack);
 		} catch(err) {
-			options = false;
+			settings = false;
 			console.log("No JSON response or received Cancel event");
 		}
 	}

@@ -1,7 +1,10 @@
-//
-// main.c
-// (c) 2014 Ted Gerold (tgwaste)
-//
+/*
+ * Example app demonstrating the different settings with Pebble, JQuery and Javascript
+ *
+ * (c) 2014 Ted Gerold (tgwaste)
+ *
+ * This code may be used or modified in any way without permission.
+*/
 
 #include "main.h"
 
@@ -11,16 +14,23 @@
 void jsmsg(DictionaryIterator *iter, void *context)
 {
 	Tuple *banner = dict_find(iter, KEY_BANNER);
+	Tuple *weekday = dict_find(iter, KEY_WEEKDAY);
+	Tuple *showdate = dict_find(iter, KEY_SHOWDATE);
+	Tuple *footer = dict_find(iter, KEY_FOOTER);
 
-	if (banner) {
-		snprintf(settings.banner, sizeof(settings.banner), "%.40s", dict_find(iter,KEY_BANNER)->value->cstring);
-		settings.weekday = !strcmp(dict_find(iter,KEY_WEEKDAY)->value->cstring,"y") ? 1 : 0;
-		settings.showdate = atoi(dict_find(iter,KEY_SHOWDATE)->value->cstring);
-		snprintf(settings.footer, sizeof(settings.footer), "%.40s", dict_find(iter,KEY_FOOTER)->value->cstring);
-		persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
-	}
+	if (banner)
+		snprintf(settings.banner, sizeof(settings.banner), "%.40s", banner->value->cstring);
 
-	banner = NULL;
+	if (weekday)
+		settings.weekday = weekday->value->cstring[0] == 'y' ? 1 : 0;
+
+	if (showdate)
+		settings.showdate = showdate->value->int16;
+
+	if (footer)
+		snprintf(settings.footer, sizeof(settings.footer), "%.40s", footer->value->cstring);
+
+	persist_write_data(SAVEKEY_SETTINGS, &settings, sizeof(settings));
 
 	layer_mark_dirty(window_layer);
 }
